@@ -1,0 +1,68 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Only run on your repository, prevents forks from deploying
+    if: github.repository == 'rg-2/trailsendsrv-website'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to EC2
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+      run: |
+        # Setup SSH
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        
+        # Add EC2 to known hosts to avoid prompt
+        ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+        
+        # Deploy landing page
+        echo "Deploying landing page..."
+        scp -i ~/.ssh/deploy_key -r landing/* ${EC2_USER}@${EC2_HOST}:/tmp/landing/
+        ssh -i ~/.ssh/deploy_key ${EC2_USER}@${EC2_HOST} << 'EOF'
+          sudo mkdir -p /var/www/trailsendsrv
+          sudo cp -r /tmp/landing/* /var/www/trailsendsrv/
+          sudo chown -R www-data:www-data /var/www/trailsendsrv
+          rm -rf /tmp/landing
+EOF
+        
+        # Deploy resume
+        echo "Deploying resume..."
+        scp -i ~/.ssh/deploy_key -r resume/* ${EC2_USER}@${EC2_HOST}:/tmp/resume/
+        ssh -i ~/.ssh/deploy_key ${EC2_USER}@${EC2_HOST} << 'EOF'
+          sudo mkdir -p /var/www/resume
+          sudo cp -r /tmp/resume/* /var/www/resume/
+          sudo chown -R www-data:www-data /var/www/resume
+          rm -rf /tmp/resume
+EOF
+        
+        echo "Deployment completed successfully!"
+        
+    - name: Verify deployment
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+      run: |
+        echo "Verifying files exist on server..."
+        ssh -i ~/.ssh/deploy_key ${EC2_USER}@${EC2_HOST} << 'EOF'
+          echo "Landing page files:"
+          ls -la /var/www/trailsendsrv/
+          echo ""
+          echo "Resume files:"
+          ls -la /var/www/resume/
+EOF
