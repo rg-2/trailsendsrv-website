@@ -26,12 +26,15 @@ jobs:
         chmod 600 ~/.ssh/deploy_key
         ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
         
+        echo "Creating temp directories on EC2..."
+        ssh -i ~/.ssh/deploy_key ${EC2_USER}@${EC2_HOST} "mkdir -p /tmp/landing /tmp/resume"
+        
         echo "Deploying landing page..."
-        scp -i ~/.ssh/deploy_key -r landing/* ${EC2_USER}@${EC2_HOST}:/tmp/landing/
+        scp -i ~/.ssh/deploy_key landing/index.html ${EC2_USER}@${EC2_HOST}:/tmp/landing/
         ssh -i ~/.ssh/deploy_key ${EC2_USER}@${EC2_HOST} "sudo mkdir -p /var/www/trailsendsrv && sudo cp -r /tmp/landing/* /var/www/trailsendsrv/ && sudo chown -R www-data:www-data /var/www/trailsendsrv && rm -rf /tmp/landing"
         
         echo "Deploying resume..."
-        scp -i ~/.ssh/deploy_key -r resume/* ${EC2_USER}@${EC2_HOST}:/tmp/resume/
+        scp -i ~/.ssh/deploy_key resume/index.html ${EC2_USER}@${EC2_HOST}:/tmp/resume/
         ssh -i ~/.ssh/deploy_key ${EC2_USER}@${EC2_HOST} "sudo mkdir -p /var/www/resume && sudo cp -r /tmp/resume/* /var/www/resume/ && sudo chown -R www-data:www-data /var/www/resume && rm -rf /tmp/resume"
         
         echo "Deployment completed successfully!"
