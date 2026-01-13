@@ -4,12 +4,11 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Only run on your repository, prevents forks from deploying
     if: github.repository == 'rg-2/trailsendsrv-website'
     
     steps:
@@ -22,33 +21,18 @@ jobs:
         EC2_HOST: ${{ secrets.EC2_HOST }}
         EC2_USER: ${{ secrets.EC2_USER }}
       run: |
-        # Setup SSH
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
         chmod 600 ~/.ssh/deploy_key
-        
-        # Add EC2 to known hosts to avoid prompt
         ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
         
-        # Deploy landing page
         echo "Deploying landing page..."
         scp -i ~/.ssh/deploy_key -r landing/* ${EC2_USER}@${EC2_HOST}:/tmp/landing/
-        ssh -i ~/.ssh/deploy_key ${EC2_USER}@${EC2_HOST} << 'EOF'
-          sudo mkdir -p /var/www/trailsendsrv
-          sudo cp -r /tmp/landing/* /var/www/trailsendsrv/
-          sudo chown -R www-data:www-data /var/www/trailsendsrv
-          rm -rf /tmp/landing
-EOF
+        ssh -i ~/.ssh/deploy_key ${EC2_USER}@${EC2_HOST} "sudo mkdir -p /var/www/trailsendsrv && sudo cp -r /tmp/landing/* /var/www/trailsendsrv/ && sudo chown -R www-data:www-data /var/www/trailsendsrv && rm -rf /tmp/landing"
         
-        # Deploy resume
         echo "Deploying resume..."
         scp -i ~/.ssh/deploy_key -r resume/* ${EC2_USER}@${EC2_HOST}:/tmp/resume/
-        ssh -i ~/.ssh/deploy_key ${EC2_USER}@${EC2_HOST} << 'EOF'
-          sudo mkdir -p /var/www/resume
-          sudo cp -r /tmp/resume/* /var/www/resume/
-          sudo chown -R www-data:www-data /var/www/resume
-          rm -rf /tmp/resume
-EOF
+        ssh -i ~/.ssh/deploy_key ${EC2_USER}@${EC2_HOST} "sudo mkdir -p /var/www/resume && sudo cp -r /tmp/resume/* /var/www/resume/ && sudo chown -R www-data:www-data /var/www/resume && rm -rf /tmp/resume"
         
         echo "Deployment completed successfully!"
         
@@ -59,10 +43,4 @@ EOF
         EC2_USER: ${{ secrets.EC2_USER }}
       run: |
         echo "Verifying files exist on server..."
-        ssh -i ~/.ssh/deploy_key ${EC2_USER}@${EC2_HOST} << 'EOF'
-          echo "Landing page files:"
-          ls -la /var/www/trailsendsrv/
-          echo ""
-          echo "Resume files:"
-          ls -la /var/www/resume/
-EOF
+        ssh -i ~/.ssh/deploy_key ${EC2_USER}@${EC2_HOST} "ls -la /var/www/trailsendsrv/ && echo '' && ls -la /var/www/resume/"
