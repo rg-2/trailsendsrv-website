@@ -18,10 +18,11 @@ Fun personal project/website hosted on AWS EC2 with automated deployment via Git
 ├── .github/workflows/ # GitHub Actions for auto-deployment
 └── SECURITY.md        # Security practices documentation
 ```
+The guacamole remote access pages is managed outside of this repository for now.
 
 ## Deployment
 
-GitHub Actions used to automatically deploy to EC2 when changes are pushed to the `main` branch.
+GitHub Actions used to automatically deploy to EC2 when changes to `main` are approved.
 
 
 ## Technologies
