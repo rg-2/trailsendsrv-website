@@ -1,4 +1,4 @@
-# Security Best Practices for Public Repository
+# Security Best Practices for this Repo
 
 This repository is my **public** playground, with the goal to practice DevOps/CI-CD while keeping infrastructure secure.
 
@@ -18,49 +18,20 @@ This repository is my **public** playground, with the goal to practice DevOps/CI
 
 ### 1. GitHub Secrets
 ### 2. Repository Protection
-```yaml
-if: github.repository == 'YOUR-USERNAME/trailsendsrv-website'
-```
-Prevents forks from running deployments, even if they somehow got secrets.
-
-### 3. Branch Protection (Recommended)
-Enable in GitHub Settings → Branches:
-- Require pull request reviews before merging to `main`
-- Require status checks to pass
-- Prevents accidental direct pushes to production
-
+- Forks prevented from running deployments, even if they somehow got secrets.
+### 3. Branch Protection
+- Require pull requests before merging to `main`
 ### 4. EC2 Security Group
 Limit SSH access:
-- Only allow SSH (port 22) from GitHub Actions IPs or your IPs
-- Use AWS security groups to whitelist IP ranges
-- Consider using GitHub's published IP ranges
-
-### 5. Separate Deployment Key
-Use a dedicated SSH key for deployments:
-- Not your personal SSH key
-- Limited permissions (only needs to copy files to /tmp)
-- Can be revoked without affecting other access
-
-## Additional Hardening
-
-### GitHub Environments
-Create a "production" environment with:
-- Required reviewers
-- Deployment protection rules
-- Environment-specific secrets
+- Dedicated SSH key used for deployments:
+- IDEAL: Implement to OIDC
+    - Until Then: Whitelist IP ranges
 
 ### Audit Logs
-GitHub provides audit logs showing:
+Periodically Review
 - Who accessed secrets (you can't see values, but can see access)
 - Deployment history
 - Permission changes
-
-### IP Whitelisting
-Lock down EC2 SSH to only GitHub Actions IPs:
-```bash
-# GitHub Actions IP ranges (check docs for current list)
-# Add to EC2 Security Group port 22 rules
-```
 
 ## If Compromised:
 1. Rotate all keys immediately in GitHub Secrets
