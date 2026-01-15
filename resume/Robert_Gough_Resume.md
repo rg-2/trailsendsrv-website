@@ -5,7 +5,7 @@
 
 ## ENGINEERING MANAGER | DISTRIBUTED TEAMS | PYTHON & C++
 
-Engineering Manager with **25+ years** building high-reliability embedded systems and leading distributed software teams. Currently managing 13 engineers across Connecticut, Boston, and Maryland. Drove enterprise DevOps transformation from SVN to GitHub with full CI/CD automation. Passionate Python developer with active algorithmic trading side project. Active TS/SCI clearance.
+Engineering Manager with **25+ years** experience building high-reliability embedded systems and leading distributed software teams. Currently managing 13 engineers across Connecticut, Boston, and Maryland. Drove enterprise DevOps transformation from SVN to GitHub with full CI/CD automation. Passionate Python developer with active algorithmic trading side project. Active TS/SCI clearance.
 
 ## TECHNICAL SKILLS
 
